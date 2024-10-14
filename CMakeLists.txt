@@ -63,7 +63,6 @@ option(MNN_INTERNAL "Build with MNN internal features, such as model authenticat
 option(MNN_JNI "Build MNN Jni for java to use" OFF)
 option(MNN_SUPPORT_BF16 "Enable MNN's bf16 op" OFF)
 option(MNN_LOW_MEMORY "Build MNN support low memory for weight quant model." OFF)
-option(MNN_CPU_WEIGHT_DEQUANT_GEMM "Build MNN CPU weight dequant related gemm kernels." OFF)
 
 IF (OHOS)
   include($ENV{NODE_PATH}/@ali/tcpkg/tcpkg.cmake)
@@ -256,6 +255,7 @@ message(STATUS "\tThreadPool: ${MNN_USE_THREAD_POOL}")
 message(STATUS "\tHidden: ${MNN_HIDDEN}")
 message(STATUS "\tBuild Path: ${CMAKE_CURRENT_BINARY_DIR}")
 message(STATUS "\tCUDA PROFILE: ${MNN_CUDA_PROFILE}")
+
 
 if(CMAKE_SYSTEM_NAME MATCHES "^Android" OR CMAKE_SYSTEM_NAME MATCHES "^Linux")
     add_definitions(-fPIC)
@@ -772,11 +772,7 @@ if (NOT MNN_BUILD_SHARED_LIBS)
         if(CMAKE_SYSTEM_NAME MATCHES "^Linux")
             set(MNN_DEPS -Wl,--whole-archive ${MNN_DEPS} -lpthread -Wl,--no-whole-archive)
         else()
-          if(APPLE)
-            set(MNN_DEPS -Wl,-force_load ${MNN_DEPS})
-          else()
             set(MNN_DEPS -Wl,--whole-archive ${MNN_DEPS} -Wl,--no-whole-archive)
-          endif()
         endif()
     endif()
 endif()
@@ -803,6 +799,8 @@ ENDIF()
 IF(MNN_EVALUATION)
 include(${CMAKE_CURRENT_LIST_DIR}/tools/evaluation/CMakeLists.txt)
 ENDIF()
+
+set_target_properties(MNN PROPERTIES OUTPUT_NAME "rkaudio_nn")
 
 # Install headers
 IF(CMAKE_SYSTEM_NAME MATCHES "^Android" AND NOT MNN_BUILD_FOR_ANDROID_COMMAND)
